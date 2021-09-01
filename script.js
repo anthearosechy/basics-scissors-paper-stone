@@ -1,114 +1,106 @@
-var rollDice = function () {
-  return 1;
+function rollDice() {
   var randomDecimal = Math.random() * 3;
   var randomInteger = Math.floor(randomDecimal);
   var diceNumber = randomInteger + 1;
   return diceNumber;
 };
 
-var gameMode = "Waiting for username";
+function getChoiceString(diceValue) {
+  if (diceValue == 1) {
+    return "Scissors";
+  }
+  if (diceValue == 2) {
+    return "Paper";
+  }
+  if (diceValue == 3) {
+    return "Stone";
+  }
+}
+
+function getChoiceInt(string) {
+  if (string == "Scissors") {
+    return 1;
+  }
+  if (string == "Paper") {
+    return 2;
+  }
+  if (string == "Stone") {
+    return 3;
+  }
+}
+
+function checkWin(progChoice, inputChoice) {
+  var diff = inputChoice - progChoice;
+
+  if (diff == 0) {
+    return 0; // 0 for draw
+  }
+
+  if (diff == -1 || diff == 2) {
+    // -1 if scissors - paper, paper - stone, 2 if stone - scissors
+    return 1; // 1 for win
+  }
+
+  if (diff == 1 || diff == -2) {
+    // 1 if paper - scissors, stone - paper, -2 if scissors - stone
+    return -1; // -1 for loss
+  }
+}
+
+function getMessage(result, gameMode) {
+  if (result == 0) {
+    return "it's a draw!";
+  }
+
+  if (result == 1) {
+    return "you won! Yay!";
+  }
+
+  if (result == -1) {
+    if (gameMode == "Normal") {
+      return "you lost! Sobbles.";
+    }
+
+    if (gameMode == "Reverse") {
+      return "you would've won if this was the normal game.";
+    }
+  };
+}
+
+var userName = "";
+var gameMode = "";
 var userWin = 0;
 var progWin = 0;
-var userName = " ";
 
-var main = function (input) {
-  var progsChoice = rollDice();
-  if (progsChoice == 1) {
-    progsChoice = "Scissors";
-  }
-  if (progsChoice == 2) {
-    progsChoice = "Paper";
-  }
-  if (progsChoice == 3) {
-    progsChoice = "Stone";
-  }
-  console.log(progsChoice);
-
-  if (input == "Normal") {
-    gameMode = "Normal";
-  }
-  if (input == "Reverse") {
-    gameMode = "Reverse";
-  }
-  console.log(gameMode);
-
-  if (gameMode == "Waiting for username") {
+function main(input) {
+  if (userName == "") {
     userName = input;
-    var myOutputValue = `Welcome ${userName}! Type 'Normal' to play a normal game of scissors, paper, stone, and type 'Reverse' to play the reverse game. <br> After choosing a game mode, you can only type 'Scissors', 'Paper' or 'Stone'.`;
-  } else if (gameMode == "Normal") {
-    myOutputValue = playNormalSPS(progsChoice, input);
+    gameMode = "selectMode";
+    return `Welcome ${userName}! Type 'Normal' to play a normal game of scissors, paper, stone, and type 'Reverse' to play the reverse game.`;
+  }
+
+  if (gameMode == "selectMode") {
+    gameMode = input;
+    return `Select 'Scissors', 'Paper' or 'Stone' to play.`;
+  }
+
+  var result;
+  var progsChoice = rollDice();
+
+  if (gameMode == 'Normal') {
+    result = checkWin(progsChoice, getChoiceInt(input));
   } else if (gameMode == "Reverse") {
-    myOutputValue = playReverseSPS(progsChoice, input);
+    result = -1 * checkWin(progsChoice, getChoiceInt(input));
   }
-  return myOutputValue;
-};
 
-var playNormalSPS = function (progsChoice, input) {
-  var message = "";
-  if (input.includes(progsChoice)) {
-    message = "It's a draw!";
-  } else if (
-    (input == "Scissors" && progsChoice == "Paper") ||
-    (input == "Paper" && progsChoice == "Stone") ||
-    (input == "Stone" && progsChoice == "Scissors")
-  ) {
-    userWin = userWin + 1;
-    message = `${userName}, you won! Yay!`;
-  } else if (
-    (progsChoice == "Scissors" && input == "Paper") ||
-    (progsChoice == "Paper" && input == "Stone") ||
-    (progsChoice == "Stone" && input == "Scissors")
-  ) {
-    progWin = progWin + 1;
-    message = `${userName}, you lost! Sobbles.`;
+  if (result == 1) {
+    userWin++;
   }
-  return `${message} <br> The game mode was ${gameMode}.🙂 <br> The computer chose ${progsChoice} and you chose ${input}. You have won ${userWin} game(s) while the computer has won ${progWin} game(s). Feel free to play again!`;
-};
 
-var playReverseSPS = function (progsChoice, input) {
-  var message = "";
-  if (input.includes(progsChoice)) {
-    message = "It's a draw!";
-  } else if (
-    (input == "Scissors" && progsChoice == "Stone") ||
-    (input == "Paper" && progsChoice == "Scissors") ||
-    (input == "Stone" && progsChoice == "Paper")
-  ) {
-    userWin = userWin + 1;
-    message = `${userName}, you won! Yay!`;
-  } else if (
-    (input == "Scissors" && progsChoice == "Paper") ||
-    (input == "Paper" && progsChoice == "Stone") ||
-    (input == "Stone" && progsChoice == "Scissors")
-  ) {
-    progWin = progWin + 1;
-    message = `${userName}, you would've won if this was the normal game.`;
+  if (result == -1) {
+    progWin++;
   }
-  return `${message} <br> The game mode was ${gameMode}.🙃 <br> The computer chose ${progsChoice} and you chose ${input}. You have won ${userWin} game(s) while the computer has won ${progWin} game(s). Feel free to play again!`;
-};
 
-//Old code
-// if (
-//   (input == "Scissors" && progsChoice == "Paper") ||
-//   (input == "Paper" && progsChoice == "Stone") ||
-//   (input == "Stone" && progsChoice == "Scissors") ||
-//   (input == "Reverse Scissors" && progsChoice == "Stone") ||
-//   (input == "Reverse Stone" && progsChoice == "Paper") ||
-//   (input == "Reverse Paper" && progsChoice == "Scissors")
-// ) {
-//   myOutputValue = "You win! Yay!";
-// }
-// if (
-//   (progsChoice == "Scissors" && input == "Paper") ||
-//   (progsChoice == "Paper" && input == "Stone") ||
-//   (progsChoice == "Stone" && input == "Scissors")
-// ) {
-//   myOutputValue = "You lose! Sobbles.";
-// }
-// if (
-//   (input == "Reverse Scissors" && progsChoice == "Paper") ||
-//   (input == "Reverse Stone" && progsChoice == "Scissors") ||
-//   (input == "Reverse Paper" && progsChoice == "Stone")
-// ) {
-//   myOutputValue = "You would've won if this was the normal game.";
-// }
+  var message = getMessage(result, gameMode);
+  return `${userName}, ${message} <br> The game mode was ${gameMode}.🙃 <br> The computer chose ${getChoiceString(progsChoice)} and you chose ${input}. You have won ${userWin} game(s) while the computer has won ${progWin} game(s). Feel free to play again!`;
+};
